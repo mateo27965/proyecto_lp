@@ -1,2 +1,2 @@
-# proyecto_lp
+# Trabajo_lp
 Proyecto del curso Lenguajes de programación - Busquedas
