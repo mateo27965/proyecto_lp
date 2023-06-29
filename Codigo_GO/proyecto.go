@@ -320,7 +320,7 @@ func main() {
 
 	for {
 		fmt.Println("\n=== Menú ===")
-		fmt.Println("1. Texto")
+		fmt.Println("1. Libros")
 		fmt.Println("2. Algoritmo Fuerza Bruta")
 		fmt.Println("3. Algoritmo Knuth-Morris-Pratt")
 		fmt.Println("4. Algoritmo Boyer-Moore")
