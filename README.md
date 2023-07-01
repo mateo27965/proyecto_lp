@@ -2,4 +2,4 @@
 Proyecto del curso Lenguajes de programación - Busquedas
 
 Para el código en GO:
-se recopiló información del siguiente repositorio: https://github.com/dougct/strmanip/blob/master/substr_search.go
+Se recopiló información del siguiente repositorio: https://github.com/dougct/strmanip/blob/master/substr_search.go
