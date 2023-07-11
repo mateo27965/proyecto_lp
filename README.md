@@ -1,13 +1,13 @@
 # Trabajo Final Lenguajes de programación
 Proyecto del curso Lenguajes de programación - SEARCH KMP, BRUTE FORCE , BOYER MOORE
 
-# Para el código en GO:
+# Para el código en GO paradigma imperativo:
 
 Se recopiló información del siguiente repositorio: 
 
 https://github.com/dougct/strmanip/blob/master/substr_search.go
 
-# Para el código en Typescript:
+# Para el código en Typescript paradigma funcional:
 
 Se recopiló información del siguiente respositorio:
 
