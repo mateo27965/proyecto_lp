@@ -1,5 +1,6 @@
 import * as readline from 'readline';
 import * as fs from 'fs';
+const Table = require('cli-table3');
 
 const usuariosRegistrados = [
   { usuario: 'cesar', contraseña: 'cesar123' },
@@ -10,7 +11,7 @@ const usuariosRegistrados = [
 
 let busquedaTexto: string[] = [];
 let busquedaPalabra: [string, number, number, string][] = [];
-let nombreLIBRO: [string, string][] = [];
+let Biblioteca: [string, string][] = [];
 
 function leerNumero(): Promise<number> {
   const rl = readline.createInterface({
@@ -140,7 +141,7 @@ async function registroTexto() {
   let libro1: string;
   if (fs.existsSync(filePath)) {
     libro1 = fs.readFileSync(filePath, 'utf-8');
-    nombreLIBRO.push([nombre, libro1]);
+    Biblioteca.push([nombre, libro1]);
     console.log("Texto registrado correctamente!");
     menu();
   }
@@ -155,37 +156,67 @@ async function registroTexto() {
 async function AparicionesFB() {
   console.log("Por favor, digite el nombre del libro!\n");
   console.log("Libros registrados en el sistema:");
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    console.log((i + 1) + ") " + nombreLIBRO[i][0]);
+  for (let i = 0; i < Biblioteca.length; i++) {
+    console.log((i + 1) + ") " + Biblioteca[i][0]);
   }
   console.log(" ");
   let nombredelibro = await leerString();
   busquedaTexto.push(nombredelibro);
   let libro = "";
   let validar = 0;
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    if (nombredelibro === nombreLIBRO[i][0]) {
-      libro = nombreLIBRO[i][1];
+  for (let i = 0; i < Biblioteca.length; i++) {
+    if (nombredelibro === Biblioteca[i][0]) {
+      libro = Biblioteca[i][1];
       break;
     }
     validar = validar + 1;
   }
-  if (validar === nombreLIBRO.length) {
+  if (validar === Biblioteca.length) {
     console.log("No se encontró el libro: ");
     menu();
   } else {
-    console.log("¿Qué palabra buscas?: ");
+     console.log("¿Qué palabra buscas?: ");
     let palabra = await leerString();
     let inicial = performance.now();
-    let apariciones = FB(libro, palabra);
+    let apariciones = KMP(libro, palabra);
     let final = performance.now();
     let tiempotranscurrido = final - inicial;
     console.log("\n\nAPARICIONES:");
     let aparicionesString: string[] = [];
-    for (let i = 0; i < apariciones.length; i++) {
-      let inicio = apariciones[i];
-      let fin = inicio + palabra.length;
-      aparicionesString.push(libro.substring(inicio - 100, fin + 100));
+    for(let i=0; i<apariciones.length;i++){
+      let registro = "";
+        if(apariciones[i] <= 100){
+          for(let j = 0; j < apariciones[i] + 100; j++){
+            if(j == apariciones[i]-1){
+                registro = registro +  libro[j] + "(" ;
+            }else if(j ==  apariciones[i] + palabra.length){
+                registro = registro + ")" + libro[j] ;
+            }else{
+                registro = registro + libro[j];
+            }
+          }    
+        }else if( apariciones[i] + palabra.length >= libro.length - 100){
+          for(let j = apariciones[i] - 100; j < libro.length; j++){
+            if(j == apariciones[i]-1){
+                registro = registro +  libro[j] + "(" ;
+            }else if(j ==  apariciones[i] + palabra.length){
+                registro = registro + ")" + libro[j] ;
+            }else{
+                registro = registro + libro[j];
+            }
+          } 
+        } else{
+          for(let j = apariciones[i] - 100; j < apariciones[i] + 100; j++){
+            if(j == apariciones[i]-1){
+                registro = registro +  libro[j] + "(" ;
+            }else if(j ==  apariciones[i] + palabra.length){
+                registro = registro + ")" + libro[j] ;
+            }else{
+                registro = registro + libro[j];
+            }
+          } 
+        }
+      aparicionesString.push(registro);
     }
     if(apariciones.length === 0){
       console.log("No se encontró apariciones. ")
@@ -242,8 +273,8 @@ async function AparicionesFB() {
           }
         }
       }
+      busquedaPalabra.push([palabra, apariciones.length, tiempotranscurrido/1000.0, "Fuerza bruta"]);
     }
-    busquedaPalabra.push([palabra, apariciones.length, tiempotranscurrido/1000.0, "Fuerza bruta"]);
     menu();
   }
 }
@@ -251,22 +282,22 @@ async function AparicionesFB() {
 async function cantidadAparicionesFB() {
   console.log("Por favor, digite el nombre del libro!\n");
   console.log("Libros registrados en el sistema:");
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    console.log((i + 1) + ") " + nombreLIBRO[i][0]);
+  for (let i = 0; i < Biblioteca.length; i++) {
+    console.log((i + 1) + ") " + Biblioteca[i][0]);
   }
   console.log(" ");
   let nombredelibro = await leerString();
   busquedaTexto.push(nombredelibro);
   let libro = "";
   let validar = 0;
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    if (nombredelibro === nombreLIBRO[i][0]) {
-      libro = nombreLIBRO[i][1];
+  for (let i = 0; i < Biblioteca.length; i++) {
+    if (nombredelibro === Biblioteca[i][0]) {
+      libro = Biblioteca[i][1];
       break;
     }
     validar = validar + 1;
   }
-  if (validar === nombreLIBRO.length) {
+  if (validar === Biblioteca.length) {
     console.log("No se encontró el libro: ");
     menu();
   } else {
@@ -310,22 +341,22 @@ function FB(texto: string, patron: string) {
 async function AparicionesKMP() {
   console.log("Por favor, digite el nombre del libro!\n");
   console.log("Libros registrados en el sistema:");
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    console.log((i + 1) + ") " + nombreLIBRO[i][0]);
+  for (let i = 0; i < Biblioteca.length; i++) {
+    console.log((i + 1) + ") " + Biblioteca[i][0]);
   }
   console.log(" ");
   let nombredelibro = await leerString();
   busquedaTexto.push(nombredelibro);
   let libro = "";
   let validar = 0;
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    if (nombredelibro === nombreLIBRO[i][0]) {
-      libro = nombreLIBRO[i][1];
+  for (let i = 0; i < Biblioteca.length; i++) {
+    if (nombredelibro === Biblioteca[i][0]) {
+      libro = Biblioteca[i][1];
       break;
     }
     validar = validar + 1;
   }
-  if (validar === nombreLIBRO.length) {
+  if (validar === Biblioteca.length) {
     console.log("No se encontró el libro: ");
     menu();
   } else {
@@ -337,11 +368,43 @@ async function AparicionesKMP() {
     let tiempotranscurrido = final - inicial;
     console.log("\n\nAPARICIONES:");
     let aparicionesString: string[] = [];
-    for (let i = 0; i < apariciones.length; i++) {
-      let inicio = apariciones[i];
-      let fin = inicio + palabra.length;
-      aparicionesString.push(libro.substring(inicio - 100, fin + 100));
+    for(let i=0; i<apariciones.length;i++){
+      let registro = "";
+        if(apariciones[i] <= 100){
+          for(let j = 0; j < apariciones[i] + 100; j++){
+            if(j == apariciones[i]-1){
+                registro = registro +  libro[j] + "(" ;
+            }else if(j ==  apariciones[i] + palabra.length){
+                registro = registro + ")" + libro[j] ;
+            }else{
+                registro = registro + libro[j];
+            }
+          }    
+        }else if( apariciones[i] + palabra.length >= libro.length - 100){
+          for(let j = apariciones[i] - 100; j < libro.length; j++){
+            if(j == apariciones[i]-1){
+                registro = registro +  libro[j] + "(" ;
+            }else if(j ==  apariciones[i] + palabra.length){
+                registro = registro + ")" + libro[j] ;
+            }else{
+                registro = registro + libro[j];
+            }
+          } 
+        } else{
+          for(let j = apariciones[i] - 100; j < apariciones[i] + 100; j++){
+            if(j == apariciones[i]-1){
+                registro = registro +  libro[j] + "(" ;
+            }else if(j ==  apariciones[i] + palabra.length){
+                registro = registro + ")" + libro[j] ;
+            }else{
+                registro = registro + libro[j];
+            }
+          } 
+        }
+      aparicionesString.push(registro);
     }
+      
+  
     if(apariciones.length === 0){
       console.log("No se encontró apariciones. ")
     }else{    
@@ -397,30 +460,31 @@ async function AparicionesKMP() {
           }
         }
       }
+      busquedaPalabra.push([palabra, apariciones.length, tiempotranscurrido/1000.0, "KMP"]);
     }
-    busquedaPalabra.push([palabra, apariciones.length, tiempotranscurrido/1000.0, "KMP"]);
+    
     menu();
   }
 }
 async function cantidadAparicionesKMP() {
   console.log("Por favor, digite el nombre del libro!\n");
   console.log("Libros registrados en el sistema:");
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    console.log((i + 1) + ") " + nombreLIBRO[i][0]);
+  for (let i = 0; i < Biblioteca.length; i++) {
+    console.log((i + 1) + ") " + Biblioteca[i][0]);
   }
   console.log(" ");
   let nombredelibro = await leerString();
   busquedaTexto.push(nombredelibro);
   let libro = "";
   let validar = 0;
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    if (nombredelibro === nombreLIBRO[i][0]) {
-      libro = nombreLIBRO[i][1];
+  for (let i = 0; i < Biblioteca.length; i++) {
+    if (nombredelibro === Biblioteca[i][0]) {
+      libro = Biblioteca[i][1];
       break;
     }
     validar = validar + 1;
   }
-  if (validar === nombreLIBRO.length) {
+  if (validar === Biblioteca.length) {
     console.log("No se encontró el libro: ");
     menu();
   } else {
@@ -499,37 +563,67 @@ function calcularLPS(patron: string): number[] {
 async function AparicionesBM() {
   console.log("Por favor, digite el nombre del libro!\n");
   console.log("Libros registrados en el sistema:");
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    console.log((i + 1) + ") " + nombreLIBRO[i][0]);
+  for (let i = 0; i < Biblioteca.length; i++) {
+    console.log((i + 1) + ") " + Biblioteca[i][0]);
   }
   console.log(" ");
   let nombredelibro = await leerString();
   busquedaTexto.push(nombredelibro);
   let libro = "";
   let validar = 0;
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    if (nombredelibro === nombreLIBRO[i][0]) {
-      libro = nombreLIBRO[i][1];
+  for (let i = 0; i < Biblioteca.length; i++) {
+    if (nombredelibro === Biblioteca[i][0]) {
+      libro = Biblioteca[i][1];
       break;
     }
     validar = validar + 1;
   }
-  if (validar === nombreLIBRO.length) {
+  if (validar === Biblioteca.length) {
     console.log("No se encontró el libro: ");
     menu();
   } else {
-    console.log("¿Qué palabra buscas?: ");
+     console.log("¿Qué palabra buscas?: ");
     let palabra = await leerString();
     let inicial = performance.now();
-    let apariciones = BoyerMoore(libro, palabra);
+    let apariciones = KMP(libro, palabra);
     let final = performance.now();
     let tiempotranscurrido = final - inicial;
     console.log("\n\nAPARICIONES:");
     let aparicionesString: string[] = [];
-    for (let i = 0; i < apariciones.length; i++) {
-      let inicio = apariciones[i];
-      let fin = inicio + palabra.length;
-      aparicionesString.push(libro.substring(inicio - 100, fin + 100));
+    for(let i=0; i<apariciones.length;i++){
+      let registro = "";
+        if(apariciones[i] <= 100){
+          for(let j = 0; j < apariciones[i] + 100; j++){
+            if(j == apariciones[i]-1){
+                registro = registro +  libro[j] + "(" ;
+            }else if(j ==  apariciones[i] + palabra.length){
+                registro = registro + ")" + libro[j] ;
+            }else{
+                registro = registro + libro[j];
+            }
+          }    
+        }else if( apariciones[i] + palabra.length >= libro.length - 100){
+          for(let j = apariciones[i] - 100; j < libro.length; j++){
+            if(j == apariciones[i]-1){
+                registro = registro +  libro[j] + "(" ;
+            }else if(j ==  apariciones[i] + palabra.length){
+                registro = registro + ")" + libro[j] ;
+            }else{
+                registro = registro + libro[j];
+            }
+          } 
+        } else{
+          for(let j = apariciones[i] - 100; j < apariciones[i] + 100; j++){
+            if(j == apariciones[i]-1){
+                registro = registro +  libro[j] + "(" ;
+            }else if(j ==  apariciones[i] + palabra.length){
+                registro = registro + ")" + libro[j] ;
+            }else{
+                registro = registro + libro[j];
+            }
+          } 
+        }
+      aparicionesString.push(registro);
     }
     if(apariciones.length === 0){
       console.log("No se encontró apariciones. ")
@@ -586,8 +680,8 @@ async function AparicionesBM() {
           }
         }
       }
+      busquedaPalabra.push([palabra, apariciones.length, tiempotranscurrido/1000.0, "B-M"]);
     }
-    busquedaPalabra.push([palabra, apariciones.length, tiempotranscurrido/1000.0, "B-M"]);
     menu();
   }
 }
@@ -595,22 +689,22 @@ async function AparicionesBM() {
 async function cantidadAparicionesBM() {
   console.log("Por favor, digite el nombre del libro!\n");
   console.log("Libros registrados en el sistema:");
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    console.log((i + 1) + ") " + nombreLIBRO[i][0]);
+  for (let i = 0; i < Biblioteca.length; i++) {
+    console.log((i + 1) + ") " + Biblioteca[i][0]);
   }
   console.log(" ");
   let nombredelibro = await leerString();
   busquedaTexto.push(nombredelibro);
   let libro = "";
   let validar = 0;
-  for (let i = 0; i < nombreLIBRO.length; i++) {
-    if (nombredelibro === nombreLIBRO[i][0]) {
-      libro = nombreLIBRO[i][1];
+  for (let i = 0; i < Biblioteca.length; i++) {
+    if (nombredelibro === Biblioteca[i][0]) {
+      libro = Biblioteca[i][1];
       break;
     }
     validar = validar + 1;
   }
-  if (validar === nombreLIBRO.length) {
+  if (validar === Biblioteca.length) {
     console.log("No se encontró el libro: ");
     menu();
   } else {
@@ -630,7 +724,6 @@ async function cantidadAparicionesBM() {
 }
 
 function BoyerMoore(texto: string, patron: string): number[] {
-  let inicial = new Date().getTime();
   const lastOccurrence = buildLastOccurrence(patron, texto);
   const apariciones: number[] = [];
 
@@ -650,9 +743,6 @@ function BoyerMoore(texto: string, patron: string): number[] {
       i += Math.max(1, j - last);
     }
   }
-
-  let final = new Date().getTime();
-  let tiempotranscurrido = final - inicial;
   return apariciones;
 }
 
@@ -667,10 +757,22 @@ function buildLastOccurrence(patron: string, texto: string): number[] {
 
 async function historial() {
   console.log("\nREGISTRO DE BUSQUEDAS DE LIBROS");
+  
+  // Crear tabla para el registro de búsquedas de libros
+  const tableLibros = new Table({
+    head: ['Búsqueda de Libros'],
+    colWidths: [50],
+  });
+
   for (let i = 0; i < busquedaTexto.length; i++) {
-    console.log(busquedaTexto[i]);
+    tableLibros.push([busquedaTexto[i]]);
   }
+  
+  console.log(tableLibros.toString()); // Mostrar la tabla
+
   console.log("\nREGISTRO DE BUSQUEDAS DE PALABRAS(Palabra,CantidadApariciones,DuracionBusqueda(segundos),Algoritmo)");
+
+  // Ordenar el arreglo de busquedaPalabra por cantidad de apariciones (según tu código original)
   for (let i = 0; i < busquedaPalabra.length; i++) {
     for (let j = 0; j < (busquedaPalabra.length - 1); j++) {
       if (busquedaPalabra[j][1] < busquedaPalabra[j + 1][1]) {
@@ -680,9 +782,19 @@ async function historial() {
       }
     }
   }
+
+  // Crear tabla para el registro de búsquedas de palabras
+  const tablePalabras = new Table({
+    head: ['Palabra', 'Cantidad de Apariciones', 'Duración de Búsqueda (segundos)', 'Algoritmo'],
+    colWidths: [15, 25, 30, 20],
+  });
+
   for (let i = 0; i < busquedaPalabra.length; i++) {
-    console.log(busquedaPalabra[i][0] + " -- " + busquedaPalabra[i][1] + " -- " + busquedaPalabra[i][2] + " -- " +  busquedaPalabra[i][3] +  "\n");
+    tablePalabras.push([busquedaPalabra[i][0], busquedaPalabra[i][1], busquedaPalabra[i][2], busquedaPalabra[i][3]]);
   }
+  
+  console.log(tablePalabras.toString()); // Mostrar la tabla
+
   menu();
 }
 
