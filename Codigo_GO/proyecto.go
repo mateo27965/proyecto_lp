@@ -220,7 +220,7 @@ func KMP(text string, pattern string) []string {
 	return result
 }
 
-// Fuerza bruta: Buscar la palabra(target) en textos
+
 func FuerzaBruta(target string, textos string) []string {
 	resultados := []byte(textos)
 
