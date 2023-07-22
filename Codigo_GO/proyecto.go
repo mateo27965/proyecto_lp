@@ -220,7 +220,7 @@ func KMP(text string, pattern string) []string {
 	return result
 }
 
-
+// FUERZA BRUTA
 func FuerzaBruta(target string, textos string) []string {
 	resultados := []byte(textos)
 
